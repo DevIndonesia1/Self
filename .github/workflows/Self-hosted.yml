@@ -1,0 +1,46 @@
+name: Self-Hosted Runner with Tailscale
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch: # Bisa dijalankan manual
+
+jobs:
+  connect-rdp:
+    runs-on: self-hosted  # Menjalankan di self-hosted runner Anda
+    
+    env:
+      TAILSCALE_AUTHKEY: ${{ secrets.TAILSCALE_AUTHKEY }}  # Ambil AuthKey dari GitHub Secrets
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4  # Mengambil kode sumber repository
+
+      - name: Install Tailscale
+        run: |
+          echo "Installing Tailscale..."
+          # Perintah untuk install Tailscale di Windows
+          powershell -Command "Invoke-WebRequest -Uri https://pkgs.tailscale.com/stable/tailscale-setup.exe -OutFile tailscale-setup.exe"
+          .\tailscale-setup.exe /quiet /norestart
+
+      - name: Connect to Tailscale
+        run: |
+          echo "Connecting to Tailscale..."
+          tailscale up --authkey $env:TAILSCALE_AUTHKEY
+
+      - name: Verify Tailscale Connection
+        run: |
+          echo "Checking Tailscale status..."
+          tailscale status
+
+      - name: List Tailscale IP
+        run: |
+          echo "Getting Tailscale IP..."
+          tailscale ip -4
+
+      - name: Connect to RDP
+        run: |
+          echo "Connecting to RDP using Tailscale IP..."
+          # Gantilah perintah ini jika ada proses khusus untuk verifikasi RDP
+          echo "RDP setup complete."
