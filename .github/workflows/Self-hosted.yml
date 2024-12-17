@@ -39,27 +39,28 @@ jobs:
         Set-ItemProperty -Path "HKLM:\System\CurrentControlSet\Control\Terminal Server" -Name "fDenyTSConnections" -Value 0
         Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
 
-    - name: List Local Users to Check Administrator Account
+    - name: Create Administrator Account if Not Exists
       shell: powershell
       run: |
-        Get-LocalUser
-
-    - name: Set Password for Existing User (if Administrator is not found)
-      shell: powershell
-      run: |
-        $username = "Administrator"
+        # Set username and password
+        $username = "administrator"  # Using 'administrator' with lowercase 'a'
         $password = ConvertTo-SecureString "Budeaxasb13" -AsPlainText -Force
         $credential = New-Object System.Management.Automation.PSCredential ($username, $password)
-        
-        # Check if Administrator exists, otherwise use a different account (like Admin)
+
+        # Check if administrator account exists
         $adminUser = Get-LocalUser -Name $username -ErrorAction SilentlyContinue
         if ($adminUser) {
+          Write-Host "Administrator account exists, setting password."
           Set-LocalUser -Name $username -Password $password
         } else {
-          Write-Host "Administrator account not found, trying to use 'Admin'"
-          $username = "Admin"  # Replace with another account if needed
-          Set-LocalUser -Name $username -Password $password
+          Write-Host "Administrator account not found. Creating new administrator account."
+          # Create administrator account if not exists
+          New-LocalUser -Name $username -Password $password -FullName "Administrator" -Description "Local Administrator Account"
+          Add-LocalGroupMember -Group "Administrators" -Member $username
         }
+
+        # Enable the administrator account if it's disabled
+        Enable-LocalUser -Name $username
 
     - name: Start Tailscale
       shell: powershell
