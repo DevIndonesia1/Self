@@ -39,10 +39,16 @@ jobs:
         Set-ItemProperty -Path "HKLM:\System\CurrentControlSet\Control\Terminal Server" -Name "fDenyTSConnections" -Value 0
         Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
 
+    - name: Enable Administrator Account
+      shell: powershell
+      run: |
+        # Enable the Administrator account if it's disabled
+        Enable-LocalUser -Name "Administrator"
+
     - name: Set Username and Password for Administrator
       shell: powershell
       run: |
-        $username = "administrator"
+        $username = "Administrator"
         $password = ConvertTo-SecureString "Budeaxasb13" -AsPlainText -Force
         $credential = New-Object System.Management.Automation.PSCredential ($username, $password)
         
