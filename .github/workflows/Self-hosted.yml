@@ -66,3 +66,10 @@ jobs:
       shell: powershell
       run: |
         Start-Process "C:\Program Files\Tailscale\tailscale.exe" -ArgumentList "up", "--authkey", "${{ secrets.TAILSCALE_AUTHKEY }}" -Wait
+
+    - name: Get Tailscale IP
+      shell: powershell
+      run: |
+        # Retrieve the Tailscale IP
+        $tailscaleIp = & "C:\Program Files\Tailscale\tailscale.exe" ip -4
+        Write-Host "Tailscale IP: $tailscaleIp"
