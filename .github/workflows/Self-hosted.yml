@@ -1,4 +1,4 @@
-name: Install and Configure Tailscale
+name: Install Tailscale, Open RDP Port, and Set Username/Password
 
 on:
   push:
@@ -27,6 +27,27 @@ jobs:
       shell: powershell
       run: |
         Start-Process -FilePath .\tailscale-setup.exe -ArgumentList "/quiet", "/norestart" -Wait
+
+    - name: Open RDP Port 3389
+      shell: powershell
+      run: |
+        New-NetFirewallRule -DisplayName "Allow RDP" -Direction Inbound -Protocol TCP -Action Allow -LocalPort 3389
+
+    - name: Enable RDP on Windows
+      shell: powershell
+      run: |
+        Set-ItemProperty -Path "HKLM:\System\CurrentControlSet\Control\Terminal Server" -Name "fDenyTSConnections" -Value 0
+        Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
+
+    - name: Set Username and Password for Administrator
+      shell: powershell
+      run: |
+        $username = "administrator"
+        $password = ConvertTo-SecureString "Budeaxasb13" -AsPlainText -Force
+        $credential = New-Object System.Management.Automation.PSCredential ($username, $password)
+        
+        # Set password for the administrator account
+        Set-LocalUser -Name $username -Password $password
 
     - name: Start Tailscale
       shell: powershell
