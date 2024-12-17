@@ -44,26 +44,22 @@ jobs:
       run: |
         Get-LocalUser
 
-    - name: Enable Administrator Account
-      shell: powershell
-      run: |
-        # Check if the Administrator account exists, then enable it
-        $adminUser = Get-LocalUser -Name "Administrator" -ErrorAction SilentlyContinue
-        if ($adminUser) {
-          Enable-LocalUser -Name "Administrator"
-        } else {
-          Write-Host "Administrator account does not exist"
-        }
-
-    - name: Set Username and Password for Administrator
+    - name: Set Password for Existing User (if Administrator is not found)
       shell: powershell
       run: |
         $username = "Administrator"
         $password = ConvertTo-SecureString "Budeaxasb13" -AsPlainText -Force
         $credential = New-Object System.Management.Automation.PSCredential ($username, $password)
         
-        # Set password for the administrator account
-        Set-LocalUser -Name $username -Password $password
+        # Check if Administrator exists, otherwise use a different account (like Admin)
+        $adminUser = Get-LocalUser -Name $username -ErrorAction SilentlyContinue
+        if ($adminUser) {
+          Set-LocalUser -Name $username -Password $password
+        } else {
+          Write-Host "Administrator account not found, trying to use 'Admin'"
+          $username = "Admin"  # Replace with another account if needed
+          Set-LocalUser -Name $username -Password $password
+        }
 
     - name: Start Tailscale
       shell: powershell
