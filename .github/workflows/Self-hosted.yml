@@ -39,11 +39,21 @@ jobs:
         Set-ItemProperty -Path "HKLM:\System\CurrentControlSet\Control\Terminal Server" -Name "fDenyTSConnections" -Value 0
         Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
 
+    - name: List Local Users to Check Administrator Account
+      shell: powershell
+      run: |
+        Get-LocalUser
+
     - name: Enable Administrator Account
       shell: powershell
       run: |
-        # Enable the Administrator account if it's disabled
-        Enable-LocalUser -Name "Administrator"
+        # Check if the Administrator account exists, then enable it
+        $adminUser = Get-LocalUser -Name "Administrator" -ErrorAction SilentlyContinue
+        if ($adminUser) {
+          Enable-LocalUser -Name "Administrator"
+        } else {
+          Write-Host "Administrator account does not exist"
+        }
 
     - name: Set Username and Password for Administrator
       shell: powershell
