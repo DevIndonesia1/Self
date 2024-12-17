@@ -1,4 +1,4 @@
-name: Install Tailscale, Open RDP Port, and Set Username/Password
+name: Install Tailscale, Open RDP Port, and Set Username
 
 on:
   push:
