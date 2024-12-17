@@ -31,4 +31,4 @@ jobs:
     - name: Start Tailscale
       shell: powershell
       run: |
-        "C:\Program Files\Tailscale\tailscale.exe" up --authkey "${{ secrets.TAILSCALE_AUTHKEY }}"
+        Start-Process "C:\Program Files\Tailscale\tailscale.exe" -ArgumentList "up", "--authkey", "${{ secrets.TAILSCALE_AUTHKEY }}" -Wait
